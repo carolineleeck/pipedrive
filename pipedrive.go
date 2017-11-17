@@ -119,25 +119,8 @@ func (c *Client) FindOrCreateOrganization(org *Organization) error {
 		if c.DefaultUserID != 0 {
 			postStruct["owner_id"] = c.DefaultUserID
 		}
-		postBody, err := json.Marshal(postStruct)
+		data, err := c.createEntitiy("/organizations", postStruct)
 		if err != nil {
-			return err
-		}
-		postURL, err := c.authenticatedURL("/organizations")
-		if err != nil {
-			return err
-		}
-		postResp, err := c.httpClient.Post(postURL.String(), "application/json", bytes.NewReader(postBody))
-		if err != nil {
-			return err
-		}
-
-		buf = new(bytes.Buffer)
-		_, err = buf.ReadFrom(postResp.Body)
-		if err != nil {
-			return err
-		}
-		if err = json.Unmarshal(buf.Bytes(), &data); err != nil {
 			return err
 		}
 
@@ -189,25 +172,8 @@ func (c *Client) FindOrCreatePerson(newPerson *Person) error {
 		if c.DefaultUserID != 0 {
 			postStruct["owner_id"] = c.DefaultUserID
 		}
-		postBody, err := json.Marshal(postStruct)
+		data, err := c.createEntitiy("/persons", postStruct)
 		if err != nil {
-			return err
-		}
-		postURL, err := c.authenticatedURL("/persons")
-		if err != nil {
-			return err
-		}
-		postResp, err := c.httpClient.Post(postURL.String(), "application/json", bytes.NewReader(postBody))
-		if err != nil {
-			return err
-		}
-
-		buf = new(bytes.Buffer)
-		_, err = buf.ReadFrom(postResp.Body)
-		if err != nil {
-			return err
-		}
-		if err = json.Unmarshal(buf.Bytes(), &data); err != nil {
 			return err
 		}
 
@@ -237,26 +203,9 @@ func (c *Client) CreateDeal(newDeal *Deal) error {
 	for name, value := range newDeal.Fields {
 		bodyData[name] = value
 	}
-	postBody, err := json.Marshal(bodyData)
-	if err != nil {
-		return err
-	}
-	postURL, err := c.authenticatedURL("/deals")
-	if err != nil {
-		return err
-	}
-	postResp, err := c.httpClient.Post(postURL.String(), "application/json", bytes.NewReader(postBody))
-	if err != nil {
-		return err
-	}
 
-	var data map[string]interface{}
-	buf := new(bytes.Buffer)
-	_, err = buf.ReadFrom(postResp.Body)
+	data, err := c.createEntitiy("/deals", bodyData)
 	if err != nil {
-		return err
-	}
-	if err = json.Unmarshal(buf.Bytes(), &data); err != nil {
 		return err
 	}
 
@@ -264,7 +213,7 @@ func (c *Client) CreateDeal(newDeal *Deal) error {
 	if data["data"] != nil {
 		newDeal.ID = int(data["data"].(map[string]interface{})["id"].(float64))
 	} else {
-		return fmt.Errorf("Error creating Pipedrive deal: %s", buf.String())
+		return fmt.Errorf("Error creating Pipedrive deal: %+v", data)
 	}
 
 	return nil
@@ -280,4 +229,28 @@ func (c *Client) authenticatedURL(path string) (*url.URL, error) {
 	query.Add("api_token", c.APIToken)
 	authedURL.RawQuery = query.Encode()
 	return authedURL, nil
+}
+
+func (c *Client) createEntitiy(path string, bodyData interface{}) (map[string]interface{}, error) {
+	var data map[string]interface{}
+	postBody, err := json.Marshal(bodyData)
+	if err != nil {
+		return data, err
+	}
+	postURL, err := c.authenticatedURL(path)
+	if err != nil {
+		return data, err
+	}
+	postResp, err := c.httpClient.Post(postURL.String(), "application/json", bytes.NewReader(postBody))
+	if err != nil {
+		return data, err
+	}
+
+	buf := new(bytes.Buffer)
+	_, err = buf.ReadFrom(postResp.Body)
+	if err != nil {
+		return data, err
+	}
+	err = json.Unmarshal(buf.Bytes(), &data)
+	return data, err
 }
