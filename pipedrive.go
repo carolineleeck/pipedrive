@@ -6,7 +6,6 @@ import (
 	"errors"
 	"fmt"
 	"io"
-	"log"
 	"net"
 	"net/http"
 	"net/url"
@@ -89,13 +88,11 @@ func NewClient(baseURL, apiToken string, opts ClientOptions) *Client {
 // FindOrCreateOrganization searches for an Organization by name and creates a
 // new one if it doesn't exist
 func (c *Client) FindOrCreateOrganization(org *Organization) error {
-	log.Println("Org name", org.Name)
 	authedURL, err := c.authenticatedURL("/organizations/find?term=" + org.Name)
 	if err != nil {
 		return err
 	}
 
-	fmt.Println("Org search url", authedURL.String())
 	resp, err := c.httpClient.Get(authedURL.String())
 	if err != nil {
 		return err
@@ -112,7 +109,6 @@ func (c *Client) FindOrCreateOrganization(org *Organization) error {
 		return err
 	}
 
-	log.Println("Org find resp:", buf.String())
 	if data["data"] != nil {
 		// This will likely crash us...
 		org.ID = int(data["data"].([]interface{})[0].(map[string]interface{})["id"].(float64))
@@ -131,7 +127,6 @@ func (c *Client) FindOrCreateOrganization(org *Organization) error {
 		if err != nil {
 			return err
 		}
-		fmt.Println("Create org body", string(postBody))
 		postResp, err := c.httpClient.Post(postURL.String(), "application/json", bytes.NewReader(postBody))
 		if err != nil {
 			return err
@@ -146,7 +141,6 @@ func (c *Client) FindOrCreateOrganization(org *Organization) error {
 			return err
 		}
 
-		log.Println("Org create resp:", buf.String())
 		if data["data"] != nil {
 			org.ID = int(data["data"].(map[string]interface{})["id"].(float64))
 		} else {
@@ -251,7 +245,6 @@ func (c *Client) CreateDeal(newDeal *Deal) error {
 	if err != nil {
 		return err
 	}
-	log.Printf("Create deal: %s", string(postBody))
 	postResp, err := c.httpClient.Post(postURL.String(), "application/json", bytes.NewReader(postBody))
 	if err != nil {
 		return err
@@ -263,7 +256,6 @@ func (c *Client) CreateDeal(newDeal *Deal) error {
 	if err != nil {
 		return err
 	}
-	log.Printf("Resp: %s", buf.String())
 	if err = json.Unmarshal(buf.Bytes(), &data); err != nil {
 		return err
 	}
