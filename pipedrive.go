@@ -44,9 +44,10 @@ type Person struct {
 
 // Organization is a PipeDrive Organization representation
 type Organization struct {
-	ID      int    `json:"id"`
-	Name    string `json:"name"`
-	OwnerID int    `json:"owner_id"`
+	ID      int                    `json:"id"`
+	Name    string                 `json:"name"`
+	OwnerID int                    `json:"owner_id"`
+	Fields  map[string]interface{} `json:"fields"`
 }
 
 // Deal is a PipeDrive Deal representation
@@ -116,6 +117,10 @@ func (c *Client) FindOrCreateOrganization(org *Organization) error {
 		postStruct := map[string]interface{}{
 			"name": org.Name,
 		}
+		for name, value := range org.Fields {
+			postStruct[name] = value
+		}
+
 		if c.DefaultUserID != 0 {
 			postStruct["owner_id"] = c.DefaultUserID
 		}
