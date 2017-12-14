@@ -205,6 +205,7 @@ func (c *Client) CreateDeal(newDeal *Deal) error {
 		"user_id":   newDeal.UserID,
 		"person_id": newDeal.PersonID,
 		"org_id":    newDeal.OrganizationID,
+		"stage_id":  newDeal.StageID,
 	}
 	for name, value := range newDeal.Fields {
 		bodyData[name] = value
