@@ -58,6 +58,7 @@ type Deal struct {
 	UserID         int                    `json:"user_id"`
 	PersonID       int                    `json:"person_id"`
 	OrganizationID int                    `json:"org_id"`
+	StageID        int                    `json:"stage_id"`
 	Fields         map[string]interface{} `json:"fields"`
 }
 
