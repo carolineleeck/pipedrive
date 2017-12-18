@@ -125,7 +125,7 @@ func (c *Client) FindOrCreateOrganization(org *Organization) error {
 		if c.DefaultUserID != 0 {
 			postStruct["owner_id"] = c.DefaultUserID
 		}
-		data, err := c.createEntitiy("/organizations", postStruct)
+		data, err := c.createEntity("/organizations", postStruct)
 		if err != nil {
 			return err
 		}
@@ -178,7 +178,7 @@ func (c *Client) FindOrCreatePerson(newPerson *Person) error {
 		if c.DefaultUserID != 0 {
 			postStruct["owner_id"] = c.DefaultUserID
 		}
-		data, err := c.createEntitiy("/persons", postStruct)
+		data, err := c.createEntity("/persons", postStruct)
 		if err != nil {
 			return err
 		}
@@ -211,7 +211,7 @@ func (c *Client) CreateDeal(newDeal *Deal) error {
 		bodyData[name] = value
 	}
 
-	data, err := c.createEntitiy("/deals", bodyData)
+	data, err := c.createEntity("/deals", bodyData)
 	if err != nil {
 		return err
 	}
@@ -238,7 +238,7 @@ func (c *Client) authenticatedURL(path string) (*url.URL, error) {
 	return authedURL, nil
 }
 
-func (c *Client) createEntitiy(path string, bodyData interface{}) (map[string]interface{}, error) {
+func (c *Client) createEntity(path string, bodyData interface{}) (map[string]interface{}, error) {
 	var data map[string]interface{}
 	postBody, err := json.Marshal(bodyData)
 	if err != nil {
