@@ -9,6 +9,7 @@ import (
 	"net"
 	"net/http"
 	"net/url"
+	"strings"
 	"time"
 )
 
@@ -112,9 +113,16 @@ func (c *Client) FindOrCreateOrganization(org *Organization) error {
 	}
 
 	if data["data"] != nil {
-		// This will likely crash us...
-		org.ID = int(data["data"].([]interface{})[0].(map[string]interface{})["id"].(float64))
-	} else {
+		for _, element := range data["data"].([]interface{}) {
+			found_org_name := strings.ToLower(element.(map[string]interface{})["name"].(string))
+			if found_org_name == strings.ToLower(org.Name) {
+				org.ID = int(element.(map[string]interface{})["id"].(float64))
+				break
+			}
+		}
+	}
+
+	if org.ID == 0 {
 		postStruct := map[string]interface{}{
 			"name": org.Name,
 		}
